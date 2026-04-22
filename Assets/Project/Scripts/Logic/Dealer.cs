@@ -1,57 +1,80 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Solitaire.Views;
+using System;
 
 namespace Solitaire.Logic
 {
     public class Dealer
     {   
-        public void Deal(List<CardView> cardViews, List<PileView> tableauPiles, PileView stockPile)
+        private readonly float _timeBetweenCards = 0.05f;
+        private readonly float _moveDuration = 0.35f; 
+        private float _currentDelay = 0f;
+        public void Deal(List<CardView> cardViews, List<PileView> tableauPiles, PileView stockPile, System.Action onDealComplete = null)
         {
-            int cardIndex = 0; 
+            _currentDelay = 0f; // reseta o timer
+            int cardIndex = 0;
 
-            // distribui para o tableu
-            for(int i=0; i < tableauPiles.Count; i++)
+            cardIndex = DealToTableau(cardViews, tableauPiles);
+            DealToStock(cardViews, stockPile, cardIndex, onDealComplete);
+        }
+
+        private int DealToTableau(List<CardView> cardViews, List<PileView> tableauPiles)
+        {
+            int index = 0;
+
+            for(int i=0; i< tableauPiles.Count; i++)
             {
-                for(int j=0; j <= i; j++)
+                for(int j=0; j<= i; j++)
                 {
-                    CardView card = cardViews[cardIndex];
+                    CardView card = cardViews[index];
                     PileView targetPile = tableauPiles[i];
 
-                    MoveCardToPile(card, targetPile); // move a carta logicamente e visualmente
+                    bool isLastCardInColumn = (j == i);
 
-                    // a ultima carta começa virada para cima 
-                    if (j==i)
-                    {
-                        // aqui acessaremos o model via presenter ou direto se necessario
-                    }
+                    MoveCardToPile(card, targetPile, flipOnArrival: isLastCardInColumn);
 
-                    cardIndex++;
+                    index++;
                 }
-            }   
+            }
 
-            // o resto das cartas vai para o stock
-            while (cardIndex < cardViews.Count)
+            return index;
+        }
+
+        private void DealToStock(List<CardView> cardViews, PileView stockPile, int startIndex, Action onDealComplete = null)
+        {
+            for(int i=0; i<cardViews.Count; i++)
             {
-                MoveCardToPile(cardViews[cardIndex], stockPile);
-                cardIndex++;
+                CardView card = cardViews[startIndex];
+                bool isVeryLastCard =  i == cardViews.Count - 1;
+
+                // se for a ultima carda do baralho agenda o callback de finalizaçao
+                MoveCardToPile(card, stockPile, flipOnArrival: false, onArrival: isVeryLastCard ? onDealComplete : null);
             }
         }
 
-        private void MoveCardToPile(CardView card, PileView pile)
+        private void MoveCardToPile(CardView card, PileView pile, bool flipOnArrival, Action onArrival = null)
         {
-            // teleporta a carta para a posição na pilha;
-            if(pile.Type == PileView.PileType.Tableau)
-                card.transform.position = pile.GetNextCardPosition();
-            else 
-                card.transform.position = pile.transform.position;
-                
-            // organiza a hierarquia do unity
-            card.transform.SetParent(pile.transform);
+            // estado lógico (imediato)
+            Vector3 targetPosition = pile.Type == PileView.PileType.Tableau? pile.GetNextCardPosition() : pile.transform.position;
 
-            // adiciona a carta à lista da pilha
+            card.transform.SetParent(pile.transform);
             pile.AddCard(card);
+
+            // estado visual (assincrono)
+            // Montamos uma função anônima (Action) que será executada quando o DOTween terminar o voo
+            Action onAnimationComplete = () =>
+            {
+                if(flipOnArrival) card.RequestFlip();
+                onArrival?.Invoke();
+            };
+
+            // Dispara a animação 
+            card.MoveTo(targetPosition, _moveDuration, _currentDelay, onAnimationComplete);
+
+            _currentDelay += _timeBetweenCards;
         }
+
 
     }
 }

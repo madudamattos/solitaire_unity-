@@ -22,6 +22,15 @@ namespace Solitaire.Views
         public void SetFaceUp(bool isFaceUp){ spriteRenderer.sprite = isFaceUp ? cardFront : cardBack; }
         public void RequestFlip() { _presenter?.FlipCard(); }
 
+        public void MoveTo(Vector3 targetPosition, float duration, float delay, System.Action onComplete = null)
+        {
+            // O método DOMove realiza a interpolação do transform.position
+            transform.DOMove(targetPosition, duration)
+                     .SetDelay(delay)
+                     .SetEase(Ease.OutQuad)
+                     .OnComplete(() => onComplete?.Invoke());
+        }
+
         private void OnDestroy()
         {
             _presenter?.Dispose();

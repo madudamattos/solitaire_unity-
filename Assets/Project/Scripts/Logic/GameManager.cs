@@ -52,22 +52,13 @@ namespace Solitaire.Logic
             // organizar cartas em pilhas 
 
             Dealer dealer = new Dealer();
-            dealer.Deal(_cardViews, tableauPiles, stockPile);
-
-            FlipInitialCards();
-        }
-
-        private void FlipInitialCards()
+            dealer.Deal(_cardViews, tableauPiles, stockPile, OnDealFinished);
+}       
+        private void OnDealFinished()
         {
-            // vira a ultima carta de cada pilha do tableau
-            foreach(var pile in tableauPiles)
-            {
-                if(pile.GetPileCount() > 0)
-                {
-                    // pega o ultimo card e chama o flip nele 
-                    pile.GetLastCard().RequestFlip();
-                }
-            }
+            Debug.Log("Distribuição concluída. As cartas estão na mesa.");
+        
+            // InputManager.EnableInteraction();
         }
 
         private Sprite GetSpriteFrontForCard(Rank rank, Suit suit)
