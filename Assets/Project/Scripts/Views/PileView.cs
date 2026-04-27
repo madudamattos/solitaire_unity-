@@ -44,5 +44,11 @@ namespace Solitaire.Views
         {
             return CardsInPile;
         }
+
+        public void RemoveCard(CardView card)
+        {
+            if(CardsInPile.Contains(card))
+                CardsInPile.Remove(card);
+        }
     }
 }

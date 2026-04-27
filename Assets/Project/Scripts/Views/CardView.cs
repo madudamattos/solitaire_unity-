@@ -1,18 +1,23 @@
 using UnityEngine;
 using DG.Tweening; // Usando DOTween para o movimento 
-using Solitaire.Models;
 using Solitaire.Presenters;
 
 namespace Solitaire.Views 
 {
     public class CardView : MonoBehaviour
     {
+        [Header("Visual References")]
         [SerializeField] private SpriteRenderer spriteRenderer;
+        [SerializeField] private Collider2D collider;
+
+        [Header("On initialization references")]
         [SerializeField] private Sprite cardFront;
         [SerializeField] private Sprite cardBack;
-
+        
         private CardPresenter _presenter;
-        public void Setup(Sprite front, Sprite back)
+
+        public CardPresenter Presenter => _presenter;
+         public void Setup(Sprite front, Sprite back)
         {
             cardFront = front; 
             cardBack = back;
@@ -21,6 +26,15 @@ namespace Solitaire.Views
         public void Bind(CardPresenter presenter) { _presenter = presenter; }
         public void SetFaceUp(bool isFaceUp){ spriteRenderer.sprite = isFaceUp ? cardFront : cardBack; }
         public void RequestFlip() { _presenter?.FlipCard(); }
+
+        public void SetCollider(bool enable)
+        {
+            collider.enabled = enable;
+        }
+        public void SetSortingOrder(int order)
+        {
+            spriteRenderer.sortingOrder = order;
+        }
 
         public void MoveTo(Vector3 targetPosition, float duration, float delay, System.Action onComplete = null)
         {

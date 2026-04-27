@@ -28,12 +28,13 @@ namespace Solitaire.Logic
                 for(int j=0; j<= i; j++)
                 {
                     CardView card = cardViews[index];
-                    PileView targetPile = tableauPiles[i];
-
+                    PileView targetPile = tableauPiles[i];  
+                    
                     bool isLastCardInColumn = (j == i);
 
                     MoveCardToPile(card, targetPile, flipOnArrival: isLastCardInColumn);
 
+                    card.SetSortingOrder(j); // ajuste visual para as cartas mais abaixo na hierarquia serem renderizadas por cima
                     index++;
                 }
             }
@@ -60,6 +61,7 @@ namespace Solitaire.Logic
 
             card.transform.SetParent(pile.transform);
             pile.AddCard(card);
+            card.GetComponent<CardInteraction>().CurrentPile = pile;
 
             // estado visual (assincrono)
             // Montamos uma função anônima (Action) que será executada quando o DOTween terminar o voo

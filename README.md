@@ -161,23 +161,6 @@ Run tests via **Window > General > Test Runner** in the Unity Editor.
 - [ ] Persistent high score via `PlayerPrefs` or ScriptableObject
 - [ ] Sound effects layer (decoupled via an `AudioPresenter`)
 
----
-
-## 🤝 Contributing
-
-Contributions are welcome. Please follow the existing architectural conventions — new features should respect the Model/View/Presenter boundaries and avoid introducing cross-layer dependencies.
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/my-feature`)
-3. Commit your changes (`git commit -m 'feat: add my feature'`)
-4. Push to the branch (`git push origin feature/my-feature`)
-5. Open a Pull Request
-
----
-
-## 📄 License
-
-Distributed under the MIT License. See `LICENSE` for more information.
 
 ---
 

@@ -8,6 +8,8 @@ namespace Solitaire.Presenters
         private CardModel _model;
         private CardView _view;
 
+        public CardModel Model => _model;
+
         public CardPresenter(CardModel model, CardView view)
         {
             _model = model;
@@ -35,6 +37,8 @@ namespace Solitaire.Presenters
         public void FlipCard()
         {
             _model.Flip();
+            _view.SetCollider(_model.IsFaceUp);
         }
+        
     }
 }
