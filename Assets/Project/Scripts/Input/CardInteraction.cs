@@ -1,12 +1,12 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
-using Solitaire.Presenters;
 using Solitaire.Models;
 using Solitaire.Logic;
 using Solitaire.Core;
+using Solitaire.Views;
 
-namespace Solitaire.Views
+namespace Solitaire.Input
 {
     public class CardInteraction : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
     {

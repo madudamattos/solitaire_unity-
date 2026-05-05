@@ -1,9 +1,9 @@
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using System.Collections.Generic;
+using Solitaire.Views;
 
-namespace Solitaire.Views
+namespace Solitaire.Input
 {
     [RequireComponent(typeof(PileView))]
     public class StockInteraction: MonoBehaviour, IPointerClickHandler

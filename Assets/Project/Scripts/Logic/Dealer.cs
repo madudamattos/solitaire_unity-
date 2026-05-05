@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Solitaire.Views;
 using Solitaire.Core;
+using Solitaire.Input;
 
 namespace Solitaire.Logic
 {

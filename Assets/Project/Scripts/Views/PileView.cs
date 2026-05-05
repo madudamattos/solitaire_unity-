@@ -98,35 +98,6 @@ namespace Solitaire.Views
             return CardsInPile.GetRange(startIndex, CardsInPile.Count - startIndex);
         }
 
-        // public void UpdateWasteVisuals()
-        // {
-        //     if(Type != PileType.Waste) return;
-
-        //     int count = CardsInPile.Count;
-        //     if(count == 0) return;
- 
-        //     float xOffset = 0.90f;
-
-        //     for(int i=0; i<count; i++)
-        //     {
-        //         CardView card = CardsInPile[i];
-        //         Vector3 targetPos = transform.position;
-
-        //         int indexFromTop = (count - 1) - i;
-
-        //         if(indexFromTop < 3)
-        //         {
-        //             int visibleCards = Mathf.Min(3, count);
-        //             int relativeIndex = visibleCards - 1 - indexFromTop;
-
-        //             targetPos.x += relativeIndex * xOffset;
-        //         }
-
-        //         card.MoveTo(targetPos, 0.2f, 0f);
-        //         card.SetSortingOrder(i);
-        //     }
-
-        // }
 
         public void UpdateWasteVisuals()
         {
