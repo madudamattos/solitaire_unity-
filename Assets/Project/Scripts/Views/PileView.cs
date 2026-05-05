@@ -98,6 +98,36 @@ namespace Solitaire.Views
             return CardsInPile.GetRange(startIndex, CardsInPile.Count - startIndex);
         }
 
+        // public void UpdateWasteVisuals()
+        // {
+        //     if(Type != PileType.Waste) return;
+
+        //     int count = CardsInPile.Count;
+        //     if(count == 0) return;
+ 
+        //     float xOffset = 0.90f;
+
+        //     for(int i=0; i<count; i++)
+        //     {
+        //         CardView card = CardsInPile[i];
+        //         Vector3 targetPos = transform.position;
+
+        //         int indexFromTop = (count - 1) - i;
+
+        //         if(indexFromTop < 3)
+        //         {
+        //             int visibleCards = Mathf.Min(3, count);
+        //             int relativeIndex = visibleCards - 1 - indexFromTop;
+
+        //             targetPos.x += relativeIndex * xOffset;
+        //         }
+
+        //         card.MoveTo(targetPos, 0.2f, 0f);
+        //         card.SetSortingOrder(i);
+        //     }
+
+        // }
+
         public void UpdateWasteVisuals()
         {
             if(Type != PileType.Waste) return;
@@ -105,27 +135,23 @@ namespace Solitaire.Views
             int count = CardsInPile.Count;
             if(count == 0) return;
 
-            float xOffset = 0.90f;
+            float xOffset = 1.0f;
 
-            for(int i=0; i<count; i++)
+            for(int i = count - 1; i >= 0; i--) 
             {
                 CardView card = CardsInPile[i];
                 Vector3 targetPos = transform.position;
 
-                int indexFromTop = (count - 1) - i;
-
-                if(indexFromTop < 3)
+                if(i >= count - 3) 
                 {
-                    int visibleCards = Mathf.Min(3, count);
-                    int relativeIndex = visibleCards - 1 - indexFromTop;
-
-                    targetPos.x += relativeIndex * xOffset;
+                    // inverte o indice para o slot visual (0, 1, 2)
+                    int slotPos = i - Mathf.Max(0, count - 3); 
+                    targetPos.x += slotPos * xOffset;
                 }
 
                 card.MoveTo(targetPos, 0.2f, 0f);
                 card.SetSortingOrder(i);
             }
-
         }
 
     }

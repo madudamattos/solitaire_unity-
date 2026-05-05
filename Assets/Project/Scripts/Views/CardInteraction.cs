@@ -42,15 +42,14 @@ namespace Solitaire.Views
 
         public void OnBeginDrag(PointerEventData eventData)
         {
+            if(GameManager.Instance.CurrentState != GameState.Playing) return;
             if(_isDragging | CurrentPile.Type == PileType.Stock) return;
-
-            if(CurrentPile.Type == PileType.Waste && CurrentPile.GetLastCard() != _cardView)
-                return;
+            if(CurrentPile.Type == PileType.Waste && CurrentPile.GetLastCard() != _cardView) return;
     
             _isDragging = true;
             _currentPointerId = eventData.pointerId;
 
-            // obtem todas as cartas a partir da carta clicada
+            // Obtem todas as cartas a partir da carta clicada
             if(CurrentPile.Type == PileType.Tableau)
             {
                 _draggedCards = CurrentPile.GetCardsFrom(_cardView);
@@ -60,7 +59,6 @@ namespace Solitaire.Views
                 _draggedCards = new List<CardView>();
                 _draggedCards.Add(_cardView);
             }
-
 
             _offsets.Clear();
             _originalPositions.Clear();
@@ -87,7 +85,7 @@ namespace Solitaire.Views
             if(!_isDragging || eventData.pointerId != _currentPointerId) return;
             Vector3 mouseWorldPos = GetMouseWorldPosition(eventData.position);
 
-            // aplica offset individualmente em cada carta 
+            // Aplica offset individualmente em cada carta 
             for(int i=0; i<_draggedCards.Count; i++)
             {
                 _draggedCards[i].transform.position = mouseWorldPos + _offsets[i];

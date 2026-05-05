@@ -6,6 +6,8 @@ using Solitaire.Presenters;
 using System.Collections.Generic;
 using UnityEngine;
 using Solitaire.Core;
+using System;
+using UnityEditor;
 
 public class GameManager : MonoBehaviour
 {
@@ -22,12 +24,47 @@ public class GameManager : MonoBehaviour
     private List<CardPresenter> _cardPresenters = new List<CardPresenter>();
     private List<CardView> _cardViews = new List<CardView>();
 
+    [HideInInspector][Header("Game State Control")]
+    public static GameManager Instance { get; private set; }
+    public GameState CurrentState {get; private set;}
+    public event Action<GameState> OnStateChanged;
+
+    public GameObject menu;
+    public GameObject gameTable;
+
+    private void Awake()
+    {
+        if(Instance == null) Instance = this;
+        else Destroy(gameObject);
+    }
     void Start()
     {
-        InitializeGame();
+        ChangeState(GameState.Menu);
     }
 
-    public void InitializeGame()
+    public void ChangeState(GameState newState)
+    {
+        CurrentState = newState;
+        OnStateChanged?.Invoke(CurrentState);
+
+        switch(CurrentState)
+        {
+            case GameState.Menu:
+                // ativa o menu, desativa o jogo
+                break;
+            case GameState.Dealing:
+                menu.SetActive(false);
+                gameTable.SetActive(true);
+                InitializeGame();
+                break;
+            case GameState.Playing:
+                // Gameplat liberado
+                break;
+            // ...
+        }
+    }
+
+    private void InitializeGame()
     {
         // criação das cartas
         List<CardModel> deckModels = DeckGenerator.CreateFullDeck();
@@ -49,15 +86,9 @@ public class GameManager : MonoBehaviour
 
         // organizar cartas em pilhas 
         Dealer dealer = new Dealer();
-        dealer.Deal(_cardViews, tableauPiles, stockPile, OnDealFinished);
+        dealer.Deal(_cardViews, tableauPiles, stockPile, () => ChangeState(GameState.Playing));
     }       
-    private void OnDealFinished()
-    {
-        Debug.Log("Distribuição concluída. As cartas estão na mesa.");
     
-        // InputManager.EnableInteraction();
-    }
-
     private Sprite GetSpriteFrontForCard(Rank rank, Suit suit)
     {
         return deckData.cards.Find(c => c.rank == rank && c.suit == suit).cardSprite;
@@ -67,4 +98,7 @@ public class GameManager : MonoBehaviour
     {
         return deckData.cardsBack.Find(c => c.color == color).cardBackSprite;
     }
+
+    public void UI_StartGame() => ChangeState(GameState.Dealing);
+    public void UI_ReturnToMenu() => ChangeState(GameState.Menu);
 }
