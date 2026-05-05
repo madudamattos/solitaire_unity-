@@ -51,5 +51,6 @@ namespace Solitaire.Views
 
             transform.DOKill();
         }
+
     }
 }

@@ -45,9 +45,9 @@ namespace Solitaire.Logic
 
         private void DealToStock(List<CardView> cardViews, PileView stockPile, int startIndex, Action onDealComplete = null)
         {
-            for(int i=0; i< cardViews.Count; i++)
+            for(int i=startIndex; i< cardViews.Count; i++)
             {
-                CardView card = cardViews[startIndex];
+                CardView card = cardViews[i];
                 bool isVeryLastCard =  i == cardViews.Count - 1;
 
                 // se for a ultima carda do baralho agenda o callback de finalizaçao
@@ -58,7 +58,7 @@ namespace Solitaire.Logic
         private void MoveCardToPile(CardView card, PileView pile, bool flipOnArrival, Action onArrival = null)
         {
             // estado lógico (imediato)
-            Vector3 targetPosition = pile.Type == PileType.Tableau? pile.GetNextCardPosition(dealing:true) : pile.transform.position;
+            Vector3 targetPosition = pile.Type == PileType.Tableau? pile.GetNextCardPositionDeal(dealing:true) : pile.transform.position;
 
             card.transform.SetParent(pile.transform);
             pile.AddCard(card);

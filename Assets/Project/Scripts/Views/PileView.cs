@@ -15,7 +15,7 @@ namespace Solitaire.Views
         // lista visual das cartas que estão filhas desta pilha 
         private List<CardView> CardsInPile = new List<CardView>();
 
-        public Vector3 GetNextCardPosition(bool dealing = false)
+        public Vector3 GetNextCardPositionDeal(bool dealing = false)
         {
             if(Type == PileType.Tableau)
             {
@@ -25,6 +25,40 @@ namespace Solitaire.Views
                 float yOffset = CardsInPile.Count * - offset;
                 return transform.position + new Vector3(0, yOffset, 0); 
             }
+            return transform.position;
+        }
+        
+        public Vector3 GetNextCardPosition(bool dealing = false)
+        {
+            if(Type == PileType.Tableau)
+            {
+                // Se a pilha estiver vazia, retorna a âncora principal da pilha
+                if (CardsInPile.Count == 0)
+                {
+                    return transform.position;
+                }
+
+                float offset = dealing ? 0.45f : 0.90f;
+
+                // Pega a posição real na tela da última carta e desce a partir dela
+                Vector3 lastCardPos = CardsInPile.Last().transform.position;
+                
+                return lastCardPos + new Vector3(0, -offset, 0); 
+            }
+            else if(Type == PileType.Waste)
+            {
+                if (CardsInPile.Count == 0)
+                    return transform.position;
+
+                float offset = 0.95f;
+
+                // Pega a posição real na tela da última carta e desce a partir dela
+                Vector3 lastCardPos = CardsInPile.Last().transform.position;
+                
+                return lastCardPos + new Vector3(offset, 0 , 0); 
+            }
+            
+            // Para Stock e Foundations, todas as cartas ficam na posição exata da pilha
             return transform.position;
         }
 
@@ -63,5 +97,36 @@ namespace Solitaire.Views
             
             return CardsInPile.GetRange(startIndex, CardsInPile.Count - startIndex);
         }
+
+        public void UpdateWasteVisuals()
+        {
+            if(Type != PileType.Waste) return;
+
+            int count = CardsInPile.Count;
+            if(count == 0) return;
+
+            float xOffset = 0.90f;
+
+            for(int i=0; i<count; i++)
+            {
+                CardView card = CardsInPile[i];
+                Vector3 targetPos = transform.position;
+
+                int indexFromTop = (count - 1) - i;
+
+                if(indexFromTop < 3)
+                {
+                    int visibleCards = Mathf.Min(3, count);
+                    int relativeIndex = visibleCards - 1 - indexFromTop;
+
+                    targetPos.x += relativeIndex * xOffset;
+                }
+
+                card.MoveTo(targetPos, 0.2f, 0f);
+                card.SetSortingOrder(i);
+            }
+
+        }
+
     }
 }
