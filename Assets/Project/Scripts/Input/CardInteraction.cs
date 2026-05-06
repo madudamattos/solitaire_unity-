@@ -42,10 +42,9 @@ namespace Solitaire.Input
 
         public void OnBeginDrag(PointerEventData eventData)
         {
-            if(GameManager.Instance.CurrentState != GameState.Playing) return;
-            if(_isDragging | CurrentPile.Type == PileType.Stock) return;
-            if(CurrentPile.Type == PileType.Waste && CurrentPile.GetLastCard() != _cardView) return;
-    
+            if(_isDragging) return;
+            if(!MoveValidator.CanDrag(_cardView, CurrentPile)) return;
+            
             _isDragging = true;
             _currentPointerId = eventData.pointerId;
 
@@ -105,46 +104,11 @@ namespace Solitaire.Input
             // Verifica se atingimos algo e se esse algo possui o PileView
             if(hit != null && hit.TryGetComponent(out PileView targetPile))
             {   
-
-                if(targetPile.Type == PileType.Foundation && _draggedCards.Count > 1)
-                {
-                    ReturnCardsToOriginalPositions();
-                    _draggedCards.Clear();
-                }
-                
                 CardModel modelToMove = _cardView.Presenter.Model; 
 
-                if(MoveValidator.IsValidMove(modelToMove, targetPile))
+                if(MoveValidator.IsValidMove(modelToMove, targetPile, _draggedCards.Count))
                 {
-                    PileView oldPile = CurrentPile;
-
-                    // atualiza a logica de posicionamento da carta nas pilhas
-                    foreach(CardView card in _draggedCards)
-                    {
-                        // atualiza o visual
-                        card.transform.position = targetPile.GetNextCardPosition();
-                        card.transform.SetParent(targetPile.transform);
-
-                        // atualiza os estados lógicos da pilha
-                        oldPile.RemoveCard(card);
-                        targetPile.AddCard(card);
-
-                        card.SetSortingOrder(targetPile.GetPileCount());
-                        card.GetComponent<CardInteraction>().CurrentPile = targetPile;
-                    }
-                    
-                    // vira a ultima carta da pilha antiga 
-                    if(oldPile.Type == PileType.Tableau && oldPile.GetPileCount() > 0)
-                    {
-                        CardView cardLeftBehind = oldPile.GetLastCard();
-                        if(cardLeftBehind.Presenter.Model.IsFaceUp == false)
-                            cardLeftBehind.RequestFlip();
-                    }
-
-                    if(oldPile.Type == PileType.Waste)
-                    {
-                        oldPile.UpdateWasteVisuals();
-                    }
+                    MoveExecutor.ExecuteMove(_draggedCards, CurrentPile, targetPile);
                 }
                 else
                 {
@@ -158,7 +122,7 @@ namespace Solitaire.Input
 
             _draggedCards.Clear();
         }
-
+        
         private void ReturnCardsToOriginalPositions()
         {
             for(int i=0; i< _draggedCards.Count; i++)

@@ -6,7 +6,23 @@ namespace Solitaire.Logic
 {
     public static class MoveValidator
     {
-        public static bool IsValidMove(CardModel cardToMove, PileView targetPile)
+        public static bool CanDrag(CardView cardToDrag, PileView currentPile)
+        {
+            if(GameManager.Instance.CurrentState != GameState.Playing) 
+                return false;
+
+            if(currentPile.Type == PileType.Stock)
+                return false;
+
+            if(currentPile.Type == PileType.Waste && currentPile.GetLastCard() != cardToDrag) 
+                return false;
+
+            if (!cardToDrag.Presenter.Model.IsFaceUp) 
+                return false;
+            
+            return true;
+        }
+        public static bool IsValidMove(CardModel cardToMove, PileView targetPile, int draggetCardsCount)
         {
             // Regra 1 : Soltou a carta no tableau
             if(targetPile.Type == PileType.Tableau)
@@ -25,6 +41,8 @@ namespace Solitaire.Logic
             }
             else if(targetPile.Type == PileType.Foundation)
             {
+                if(draggetCardsCount > 1) return false;
+
                 if(targetPile.GetPileCount() == 0)
                 {
                     return cardToMove.Rank == Rank.Ace && cardToMove.Suit == targetPile.Suit; // se o tableau esta vazio, so aceita um as do nipe do tableu
@@ -45,5 +63,7 @@ namespace Solitaire.Logic
 
             return false;
         }
+
+
     }
 }
