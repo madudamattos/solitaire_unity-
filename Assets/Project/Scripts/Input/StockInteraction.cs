@@ -2,6 +2,9 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using Solitaire.Views;
+using Solitaire.Managers;
+using Solitaire.Logic;
+using System.Collections.Generic;
 
 namespace Solitaire.Input
 {
@@ -28,51 +31,36 @@ namespace Solitaire.Input
             {
                 RecycleWaste();
             }    
+
         }
 
         private void DrawCards(int maxAmount)
         {
+            List<CardView> draggedCards = new List<CardView>();
             // Evita erro se o stock tiver menos cartas do que a quantidade desejada de compra 
             int amountToDraw = Mathf.Min(maxAmount, _stockPile.GetPileCount());
 
+            List<CardView> stockCards = _stockPile.GetCardsInPile();
+
             for(int i=0; i<amountToDraw; i++)
             {
-                CardView card = _stockPile.GetLastCard();
-
-                _stockPile.RemoveCard(card);
-                _wastePile.AddCard(card);
-
-                card.SetSortingOrder(_wastePile.GetPileCount());
-                card.GetComponent<CardInteraction>().CurrentPile = _wastePile;
-
-                card.transform.SetParent(_wastePile.transform);
-
-                if(!card.Presenter.Model.IsFaceUp) card.RequestFlip();
+                CardView card = stockCards[stockCards.Count - 1 - i];
+                draggedCards.Add(card);
             }
-            
-            _wastePile.UpdateWasteVisuals();
-        }   
+
+            ICommand moveCommand = new MoveCardsCommand(draggedCards, _stockPile, _wastePile);
+            CommandManager.AddCommand(moveCommand);
+
+            draggedCards.Clear();
+        }    
 
         private void RecycleWaste()
         {
-            int count = _wastePile.GetPileCount();
+            List<CardView> wasteCards = _wastePile.GetCardsInPile();
 
-            for(int i=0; i<count; i++)
-            {
-                CardView card = _wastePile.GetLastCard();
-                _wastePile.RemoveCard(card);
-                _stockPile.AddCard(card);
-
-                card.transform.position = _stockPile.transform.position;
-                card.transform.SetParent(_stockPile.transform);
-
-                card.SetSortingOrder(_stockPile.GetPileCount());
-                card.GetComponent<CardInteraction>().CurrentPile = _stockPile;
-                
-                card.RequestFlip();
-            }
+            ICommand moveCommand = new MoveCardsCommand(wasteCards, _wastePile, _stockPile);
+            CommandManager.AddCommand(moveCommand);
         }
-
 
     }
 }

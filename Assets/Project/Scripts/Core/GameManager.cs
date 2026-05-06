@@ -2,9 +2,10 @@ using Solitaire.Models;
 using Solitaire.Views;
 using Solitaire.Logic;
 using Solitaire.Factories;
+using Solitaire.Managers;
+using Solitaire.Core;
 using System.Collections.Generic;
 using UnityEngine;
-using Solitaire.Core;
 using System;
 
 public class GameManager : MonoBehaviour
@@ -50,6 +51,8 @@ public class GameManager : MonoBehaviour
 
     private void InitializeGame()
     {
+        CommandManager.ClearHistory();
+        
         // criação das cartas
         List<CardModel> deckModels = DeckGenerator.CreateFullDeck();
         

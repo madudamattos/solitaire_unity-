@@ -5,6 +5,7 @@ using Solitaire.Models;
 using Solitaire.Logic;
 using Solitaire.Core;
 using Solitaire.Views;
+using Solitaire.Managers;
 
 namespace Solitaire.Input
 {
@@ -44,6 +45,7 @@ namespace Solitaire.Input
         {
             if(_isDragging) return;
             if(!MoveValidator.CanDrag(_cardView, CurrentPile)) return;
+            if (CommandManager.IsProcessing) return;
             
             _isDragging = true;
             _currentPointerId = eventData.pointerId;
@@ -108,7 +110,8 @@ namespace Solitaire.Input
 
                 if(MoveValidator.IsValidMove(modelToMove, targetPile, _draggedCards.Count))
                 {
-                    MoveExecutor.ExecuteMove(_draggedCards, CurrentPile, targetPile);
+                    ICommand moveCommand = new MoveCardsCommand(_draggedCards, CurrentPile, targetPile);
+                    CommandManager.AddCommand(moveCommand);
                 }
                 else
                 {

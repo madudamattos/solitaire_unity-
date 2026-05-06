@@ -15,11 +15,11 @@ namespace Solitaire.Views
         // lista visual das cartas que estão filhas desta pilha 
         private List<CardView> CardsInPile = new List<CardView>();
 
-        public Vector3 GetNextCardPositionDeal(bool dealing = false)
+        public Vector3 GetNextCardPositionDeal()
         {
             if(Type == PileType.Tableau)
             {
-                float offset = dealing ? 0.45f : 0.90f;
+                float offset = 0.45f;
 
                 // offset vertical para as cartas do tableau aparecerem cascateadas
                 float yOffset = CardsInPile.Count * - offset;
@@ -28,17 +28,20 @@ namespace Solitaire.Views
             return transform.position;
         }
         
-        public Vector3 GetNextCardPosition(bool dealing = false)
+        public Vector3 GetNextCardPosition()
         {
             if(Type == PileType.Tableau)
             {
                 // Se a pilha estiver vazia, retorna a âncora principal da pilha
                 if (CardsInPile.Count == 0)
-                {
                     return transform.position;
+                
+                float offset = 0.45f;
+                if(CardsInPile.Count > 1)
+                {
+                    if(GetLastCard().Presenter.Model.IsFaceUp)
+                        offset = 0.90f;
                 }
-
-                float offset = dealing ? 0.45f : 0.90f;
 
                 // Pega a posição real na tela da última carta e desce a partir dela
                 Vector3 lastCardPos = CardsInPile.Last().transform.position;
