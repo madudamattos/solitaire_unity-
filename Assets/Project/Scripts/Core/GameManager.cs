@@ -14,11 +14,21 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance { get; private set; }
     public GameState CurrentState {get; private set;}
     public event Action<GameState> OnStateChanged;
+    public event Action<bool> OnAutoCompleteAvailable;
 
     [Header("Managers")]
     [SerializeField] private DeckFactory _deckFactory;
     [SerializeField] private BoardManager _boardManager;
 
+    private void OnEnable()
+    {
+        MoveExecutor.OnBoardStateChanged += EvaluateWinCondition;        
+    }
+
+    private void OnDisable()
+    {
+        MoveExecutor.OnBoardStateChanged -= EvaluateWinCondition;     
+    }
     private void Awake()
     {
         if(Instance == null) Instance = this;
@@ -60,9 +70,39 @@ public class GameManager : MonoBehaviour
 
         // organizar cartas em pilhas 
         Dealer dealer = new Dealer();
-        dealer.Deal(cardViews, _boardManager.tableauPiles, _boardManager.stockPile, () => ChangeState(GameState.Playing));
-    }       
+        dealer.Deal(cardViews, _boardManager.tableauPiles, _boardManager.stockPile, () => StartGame());
+    } 
 
-    public void UI_StartGame() => ChangeState(GameState.Dealing);
-    public void UI_ReturnToMenu() => ChangeState(GameState.Menu);
+    private void EvaluateWinCondition()
+    {
+        if(CurrentState != GameState.Playing) return;
+
+        if(WinValidator.CheckForVictory(_boardManager.foundationPiles))
+        {
+            TriggerVictory();
+            return;
+        }
+
+        bool canAuto = WinValidator.CanAutoComplete(_boardManager.tableauPiles, _boardManager.stockPile, _boardManager.wastePile);
+        OnAutoCompleteAvailable?.Invoke(canAuto);
+    
+    }      
+
+    private void TriggerVictory()
+    {
+        ChangeState(GameState.GameOver);
+        Debug.Log("Congratulations! You won.");
+    }
+
+    public void StartAutoComplete()
+    {
+        ChangeState(GameState.Dealing);
+        CommandManager.ClearHistory();
+
+        // StartCoroutine(WinValidator.AutoCompleteCoroutine());
+    }
+
+    public void StartGame() => ChangeState(GameState.Playing);
+    public void StartDeal() => ChangeState(GameState.Dealing);
+    public void ReturnToMenu() => ChangeState(GameState.Menu);
 }

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System;
 using Solitaire.Views;
 using Solitaire.Core;
 using Solitaire.Input;
@@ -8,6 +9,7 @@ namespace Solitaire.Logic
 {
     public static class MoveExecutor
     {
+        public static event Action OnBoardStateChanged;
         public static bool ExecuteMove(List<CardView> cardsToMove, PileView sourcePile, PileView targetPile)
         {
             bool flippedCard = false;
@@ -44,9 +46,11 @@ namespace Solitaire.Logic
                 }
             }
             
-            // Sempre atualiza o leque do Waste se ele estiver envolvido
+            // Sempre atualiza o leque do Waste
             if(sourcePile.Type == PileType.Waste) sourcePile.UpdateWasteVisuals();
             if(targetPile.Type == PileType.Waste) targetPile.UpdateWasteVisuals();
+
+            OnBoardStateChanged?.Invoke();
 
             return flippedCard;
         }
@@ -83,6 +87,8 @@ namespace Solitaire.Logic
 
             if(sourcePile.Type == PileType.Waste) sourcePile.UpdateWasteVisuals();
             if(targetPile.Type == PileType.Waste) targetPile.UpdateWasteVisuals();
+        
+            OnBoardStateChanged?.Invoke();
         }
     }
 }
