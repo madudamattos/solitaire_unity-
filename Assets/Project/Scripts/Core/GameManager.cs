@@ -70,22 +70,21 @@ public class GameManager : MonoBehaviour
 
         // organizar cartas em pilhas 
         Dealer dealer = new Dealer();
-        dealer.Deal(cardViews, _boardManager.tableauPiles, _boardManager.stockPile, () => StartGame());
+        dealer.Deal(cardViews, _boardManager._tableauPiles, _boardManager._stockPile, () => StartGame());
     } 
 
     private void EvaluateWinCondition()
     {
         if(CurrentState != GameState.Playing) return;
 
-        if(WinValidator.CheckForVictory(_boardManager.foundationPiles))
+        if(WinValidator.CheckForVictory(_boardManager._foundationPiles))
         {
             TriggerVictory();
             return;
         }
 
-        bool canAuto = WinValidator.CanAutoComplete(_boardManager.tableauPiles, _boardManager.stockPile, _boardManager.wastePile);
+        bool canAuto = WinValidator.CanAutoComplete(_boardManager._tableauPiles, _boardManager._stockPile, _boardManager._wastePile);
         OnAutoCompleteAvailable?.Invoke(canAuto);
-    
     }      
 
     private void TriggerVictory()
@@ -96,10 +95,10 @@ public class GameManager : MonoBehaviour
 
     public void StartAutoComplete()
     {
-        ChangeState(GameState.Dealing);
+        ChangeState(GameState.AutoComplete);
         CommandManager.ClearHistory();
 
-        // StartCoroutine(WinValidator.AutoCompleteCoroutine());
+        _boardManager.RunAutoComplete();
     }
 
     public void StartGame() => ChangeState(GameState.Playing);

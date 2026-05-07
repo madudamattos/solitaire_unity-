@@ -1,37 +1,94 @@
 using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
 using Solitaire.Views;
-using UnityEngine.UIElements;
+using Solitaire.Logic;
+using System;
 
 public class BoardManager : MonoBehaviour
 {
     [Header("Structures")]
-    public PileView stockPile;
-    public PileView wastePile;
-    public List<PileView> foundationPiles;
-    public List<PileView> tableauPiles;
+    public PileView _stockPile;
+    public PileView _wastePile;
+    public List<PileView> _foundationPiles;
+    public List<PileView> _tableauPiles;
+
+    public event Action OnAutoCompleteFinished;
+
+    // public static BoardManager Instance { get; private set; }
+
+    // private void Awake()
+    // {
+    //     if (Instance == null) Instance = this;
+    //     else Destroy(gameObject);
+    // }
+
+    public void RunAutoComplete()
+    {
+        StartCoroutine(AutoCompleteRoutine());
+    }
+
+    private IEnumerator AutoCompleteRoutine()
+    {
+        bool isWon = false;
+        List<PileView> pilesToScan = new List<PileView>(_tableauPiles);
+        pilesToScan.Add(_wastePile);
+
+        while (!isWon)
+        {
+            bool movedCardInThisLoop = false;
+
+            foreach (PileView pile in pilesToScan)
+            {
+                if (pile.GetPileCount() == 0) continue;
+
+                CardView topCard = pile.GetLastCard();
+
+                PileView targetFoundation = MoveValidator.GetValidFoundation(topCard.Presenter.Model, _foundationPiles);
+
+                if (targetFoundation != null)
+                {
+                    MoveExecutor.ExecuteMove(new List<CardView> { topCard }, pile, targetFoundation);
+                    movedCardInThisLoop = true;
+                    
+                    yield return new WaitForSeconds(0.1f); 
+                    break;
+                }
+            }
+
+            if (!movedCardInThisLoop) break;
+
+            isWon = WinValidator.CheckForVictory(_foundationPiles);
+        }
+
+        if (isWon)
+        {
+            OnAutoCompleteFinished?.Invoke();
+        }
+    }
+
     public void ClearBoard()
     {
         // clear stock
-        int count = stockPile.GetPileCount();
+        int count = _stockPile.GetPileCount();
 
-        List<CardView> cards = stockPile.GetCardsInPile();
+        List<CardView> cards = _stockPile.GetCardsInPile();
 
         for(int i = 0; i < count; i++)
         {
-            stockPile.RemoveCard(cards[i]);
+            _stockPile.RemoveCard(cards[i]);
         }
 
         cards.Clear();
 
         // clear waste
-        count = wastePile.GetPileCount();
+        count = _wastePile.GetPileCount();
 
-        cards = wastePile.GetCardsInPile();
+        cards = _wastePile.GetCardsInPile();
 
         for(int i = 0; i < count; i++)
         {
-            wastePile.RemoveCard(cards[i]);
+            _wastePile.RemoveCard(cards[i]);
         }
 
         cards.Clear();
@@ -39,7 +96,7 @@ public class BoardManager : MonoBehaviour
         // clear foundations
         for(int i=0; i<4; i++)
         {
-            PileView pile = foundationPiles[i];
+            PileView pile = _foundationPiles[i];
 
             cards = pile.GetCardsInPile();
 
@@ -54,7 +111,7 @@ public class BoardManager : MonoBehaviour
         // clear tableaus
         for(int i=0; i<7; i++)
         {
-            PileView pile = tableauPiles[i];
+            PileView pile = _tableauPiles[i];
 
             cards = pile.GetCardsInPile();
 

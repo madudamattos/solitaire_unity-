@@ -1,6 +1,7 @@
 using Solitaire.Models;
 using Solitaire.Views;
 using Solitaire.Core;
+using System.Collections.Generic;
 
 namespace Solitaire.Logic
 {
@@ -62,6 +63,18 @@ namespace Solitaire.Logic
             }
 
             return false;
+        }
+
+        public static PileView GetValidFoundation(CardModel cardModel, List<PileView> foundations)
+        {
+            foreach (var foundation in foundations)
+            {
+                if (IsValidMove(cardModel, foundation, 1))
+                {
+                    return foundation;
+                }
+            }
+            return null;
         }
 
 
