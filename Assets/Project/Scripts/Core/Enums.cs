@@ -4,5 +4,5 @@ namespace Solitaire.Core
     public enum Back { Yellow, Blue, Green, Purple }
     public enum Rank { Ace = 1, Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King }
     public enum PileType { Tableau, Foundation, Stock, Waste }
-    public enum GameState { Menu, Dealing, Playing, Paused, GameOver }
+    public enum GameState { Menu, Dealing, Playing, AutoComplete, Paused, GameOver }
 }

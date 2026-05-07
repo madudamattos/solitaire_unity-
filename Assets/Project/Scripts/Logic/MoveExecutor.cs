@@ -4,6 +4,7 @@ using System;
 using Solitaire.Views;
 using Solitaire.Core;
 using Solitaire.Input;
+using UnityEngine;
 
 namespace Solitaire.Logic
 {

@@ -37,10 +37,10 @@ namespace Solitaire.Views
                     return transform.position;
                 
                 float offset = 0.45f;
-                if(CardsInPile.Count > 1)
+                if(CardsInPile.Count > 0)
                 {
                     if(GetLastCard().Presenter.Model.IsFaceUp)
-                        offset = 0.95f;
+                        offset = 0.92f;
                 }
 
                 // Pega a posição real na tela da última carta e desce a partir dela
