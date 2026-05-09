@@ -4,6 +4,7 @@ using Solitaire.Logic;
 using Solitaire.Factories;
 using Solitaire.Managers;
 using Solitaire.Core;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
@@ -20,14 +21,27 @@ public class GameManager : MonoBehaviour
     [SerializeField] private DeckFactory _deckFactory;
     [SerializeField] private BoardManager _boardManager;
 
+    [Header("Game Stats Control")]
+    public int Moves {get; private set;}
+    public int ElapsedSeconds { get; private set; }
+    private Coroutine _timerCoroutine;
+    public event Action<int> OnMovesChanged;
+    public event Action<int> OnTimeChanged;
+
     private void OnEnable()
     {
-        MoveExecutor.OnBoardStateChanged += EvaluateWinCondition;        
-    }
+        MoveExecutor.OnBoardStateChanged += EvaluateWinCondition;
+        CommandManager.OnCommandExecuted += HandleMoveAdded;
+        CommandManager.OnCommandUndone += HandleMoveUndone;
+        CommandManager.OnHistoryCleared += ResetStats;        
+}
 
     private void OnDisable()
     {
-        MoveExecutor.OnBoardStateChanged -= EvaluateWinCondition;     
+        MoveExecutor.OnBoardStateChanged -= EvaluateWinCondition;
+        CommandManager.OnCommandExecuted -= HandleMoveAdded;
+        CommandManager.OnCommandUndone -= HandleMoveUndone;
+        CommandManager.OnHistoryCleared -= ResetStats;     
     }
     private void Awake()
     {
@@ -53,7 +67,7 @@ public class GameManager : MonoBehaviour
                 InitializeGame();
                 break;
             case GameState.Playing:
-                // Gameplat liberado
+                SetGamePlaying();
                 break;
             // ...
         }
@@ -62,7 +76,7 @@ public class GameManager : MonoBehaviour
     private void InitializeGame()
     {
         CommandManager.ClearHistory();
-        
+
         // criação das cartas
         List<CardModel> deckModels = DeckGenerator.CreateFullDeck();
         
@@ -70,8 +84,36 @@ public class GameManager : MonoBehaviour
 
         // organizar cartas em pilhas 
         Dealer dealer = new Dealer();
-        dealer.Deal(cardViews, _boardManager._tableauPiles, _boardManager._stockPile, () => StartGame());
+        dealer.Deal(cardViews, _boardManager._tableauPiles, _boardManager._stockPile, () => StartPlay());
     } 
+
+    private void SetGamePlaying()
+    {
+        if (CurrentState == GameState.Playing)
+        {
+            if (_timerCoroutine == null)
+                _timerCoroutine = StartCoroutine(TimerRoutine());
+        }
+        // Se saiu do estado Playing (pausou, venceu, menu), para o relógio
+        else
+        {
+            if (_timerCoroutine != null)
+            {
+                StopCoroutine(_timerCoroutine);
+                _timerCoroutine = null;
+            }
+        }
+    }
+
+    private IEnumerator TimerRoutine()
+    {
+        while(true)
+        {
+            yield return new WaitForSeconds(1f);
+            ElapsedSeconds++;
+            OnTimeChanged?.Invoke(ElapsedSeconds);
+        }
+    }
 
     private void EvaluateWinCondition()
     {
@@ -101,7 +143,25 @@ public class GameManager : MonoBehaviour
         _boardManager.RunAutoComplete();
     }
 
-    public void StartGame() => ChangeState(GameState.Playing);
+    private void HandleMoveAdded() => OnMovesChanged?.Invoke(++Moves);
+    private void HandleMoveUndone() => OnMovesChanged?.Invoke(--Moves);
+
+    private void ResetStats()
+    {
+        Moves = 0;
+        ElapsedSeconds = 0;
+
+        if (_timerCoroutine != null)
+        {
+            StopCoroutine(_timerCoroutine);
+            _timerCoroutine = null;
+        }
+
+        OnMovesChanged?.Invoke(Moves);
+        OnTimeChanged?.Invoke(ElapsedSeconds);
+    }
+
+    public void StartPlay() => ChangeState(GameState.Playing);
     public void StartDeal() => ChangeState(GameState.Dealing);
     public void ReturnToMenu() => ChangeState(GameState.Menu);
 }

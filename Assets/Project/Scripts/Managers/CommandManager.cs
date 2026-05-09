@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -18,6 +19,10 @@ namespace Solitaire.Managers
         public static bool IsProcessing => Time.time < _lastCommandTime + AnimationDuration;
         
         public static bool HasCommands => _commandHistory.Count > 0;
+
+        public static event Action OnCommandExecuted;
+        public static event Action OnCommandUndone;
+        public static event Action OnHistoryCleared;
         
         public static void AddCommand(ICommand command)
         {
@@ -27,6 +32,8 @@ namespace Solitaire.Managers
             _commandHistory.Push(command);
         
             _lastCommandTime = Time.time;
+
+            OnCommandExecuted?.Invoke();
         }
 
         public static void UndoLastCommand()
@@ -37,11 +44,14 @@ namespace Solitaire.Managers
             lastCommand.Undo();
 
             _lastCommandTime = Time.time;
+
+            OnCommandUndone?.Invoke();
         }
 
         public static void ClearHistory()
         {
             _commandHistory.Clear();
+            OnHistoryCleared?.Invoke();
         }
     }
 }

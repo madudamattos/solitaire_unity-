@@ -30,7 +30,7 @@ namespace Solitaire.Views
         
         public Vector3 GetNextCardPosition()
         {
-            if(Type == PileType.Tableau)
+            if(Type == PileType.Tableau || Type == PileType.Waste)
             {
                 // Se a pilha estiver vazia, retorna a âncora principal da pilha
                 if (CardsInPile.Count == 0)
@@ -48,19 +48,7 @@ namespace Solitaire.Views
                 
                 return lastCardPos + new Vector3(0, -offset, 0); 
             }
-            else if(Type == PileType.Waste)
-            {
-                if (CardsInPile.Count == 0)
-                    return transform.position;
 
-                float offset = 0.95f;
-
-                // Pega a posição real na tela da última carta e desce a partir dela
-                Vector3 lastCardPos = CardsInPile.Last().transform.position;
-                
-                return lastCardPos + new Vector3(offset, 0 , 0); 
-            }
-            
             // Para Stock e Foundations, todas as cartas ficam na posição exata da pilha
             return transform.position;
         }
@@ -109,7 +97,7 @@ namespace Solitaire.Views
             int count = CardsInPile.Count;
             if(count == 0) return;
 
-            float xOffset = 1.0f;
+            float offset = 0.92f;
 
             for(int i = count - 1; i >= 0; i--) 
             {
@@ -120,7 +108,7 @@ namespace Solitaire.Views
                 {
                     // inverte o indice para o slot visual (0, 1, 2)
                     int slotPos = i - Mathf.Max(0, count - 3); 
-                    targetPos.x += slotPos * xOffset;
+                    targetPos.y -= slotPos * offset;
                 }
 
                 card.MoveTo(targetPos, 0.2f, 0f);
