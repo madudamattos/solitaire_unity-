@@ -10,7 +10,8 @@ public class UIManager: MonoBehaviour
 {
     [Header("Panels")]
     [SerializeField] private GameObject _menuPanel;
-    [SerializeField] private GameObject _gameTablePanel;
+    [SerializeField] private GameObject _gameTable;
+    [SerializeField] private GameObject _gamePanel;
     [SerializeField] private GameObject _victoryPanel;
     
     [Header("Buttons")]
@@ -32,7 +33,7 @@ public class UIManager: MonoBehaviour
         CommandManager.OnHistoryCleared += UpdateUndoButton;
     }
 
-    public void Start()
+    private void Start()
     {
         UpdateUndoButton();
     }
@@ -55,7 +56,8 @@ public class UIManager: MonoBehaviour
     private void HandleStateChange(GameState state)
     {
         _menuPanel.SetActive(state == GameState.Menu);
-        _gameTablePanel.SetActive(state == GameState.Dealing || state == GameState.Playing);
+        _gameTable.SetActive(state == GameState.Dealing || state == GameState.Playing);
+         _gamePanel.SetActive(state == GameState.Dealing || state == GameState.Playing);
         _victoryPanel.SetActive(state == GameState.GameOver);
 
         if (state != GameState.Playing)
@@ -74,14 +76,14 @@ public class UIManager: MonoBehaviour
 
     private void UpdateMovesText(int moves)
     {
-        _movesText.text = moves.ToString();
+        _movesText.text = "MOVES: " + moves.ToString();
     }
 
     private void UpdateTimeText(int seconds)
     {
         // Formata os segundos totais para o padrão MM:SS
         TimeSpan time = TimeSpan.FromSeconds(seconds);
-        _timerText.text = time.ToString(@"hh\:mm\:ss");
+        _timerText.text = "TIMER: " + time.ToString(@"hh\:mm\:ss");
     }
     
 
