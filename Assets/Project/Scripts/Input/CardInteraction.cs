@@ -57,6 +57,8 @@ namespace Solitaire.Input
             }
             else
             {
+                if(CurrentPile.Type == PileType.Foundation && _cardView != CurrentPile.GetLastCard()) return;
+
                 _draggedCards = new List<CardView>();
                 _draggedCards.Add(_cardView);
             }
