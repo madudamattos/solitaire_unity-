@@ -10,7 +10,6 @@ namespace Solitaire.Logic
 {
     public static class MoveExecutor
     {
-        private static float cardMoveDuration = 0.35f; 
         public static event Action OnBoardStateChanged;
         public static bool ExecuteMove(List<CardView> cardsToMove, PileView sourcePile, PileView targetPile)
         {
@@ -38,16 +37,16 @@ namespace Solitaire.Logic
                 if(stockToWaste)
                 {
                     card.RequestFlip();
-                    card.MoveTo(targetPosition, cardMoveDuration, 0, () => targetPile.UpdateWasteVisuals());
+                    card.MoveTo(targetPosition, 0.20f, 0, () => targetPile.UpdateWasteVisuals());
 
                 } else if ( wasteToStock)
                 {
                     card.RequestFlip();
-                    card.MoveTo(targetPosition, cardMoveDuration, 0, () => sourcePile.UpdateWasteVisuals());
+                    card.MoveTo(targetPosition, 0.20f, 0, () => sourcePile.UpdateWasteVisuals());
                 }
                 else
                 {
-                    card.MoveTo(targetPosition, cardMoveDuration, 0);
+                    card.MoveTo(targetPosition, 0.30f, 0);
                 }
             }
             
@@ -96,16 +95,16 @@ namespace Solitaire.Logic
                 if(stockToWaste)
                 {
                     card.RequestFlip();
-                    card.MoveTo(targetPosition, cardMoveDuration, 0, () => targetPile.UpdateWasteVisuals());
+                    card.MoveTo(targetPosition, 0.20f, 0, () => targetPile.UpdateWasteVisuals());
 
                 } else if ( wasteToStock)
                 {
                     card.RequestFlip();
-                    card.MoveTo(targetPosition, cardMoveDuration, 0, () => sourcePile.UpdateWasteVisuals());
+                    card.MoveTo(targetPosition, 0.20f, 0, () => sourcePile.UpdateWasteVisuals());
                 }
                 else
                 {
-                    card.MoveTo(targetPosition, cardMoveDuration, 0);
+                    card.MoveTo(targetPosition, 0.30f, 0);
                 }
             }
         
