@@ -15,22 +15,29 @@ public class UIManager: MonoBehaviour
     
     [Header("Buttons")]
     [SerializeField] private GameObject _autoCompleteButton;
-    [SerializeField] private GameObject _undoButton;
+    [SerializeField] private Button _undoButton;
 
     [Header("UI Text")]
     [SerializeField] private TextMeshProUGUI _movesText;
     [SerializeField] private TextMeshProUGUI _timerText;
 
-    private void Awake()
+    private void OnEnable()
     {
         GameManager.Instance.OnStateChanged += HandleStateChange;
         GameManager.Instance.OnAutoCompleteAvailable += ToggleAutoCompleteButton;
         GameManager.Instance.OnMovesChanged += UpdateMovesText;
         GameManager.Instance.OnTimeChanged += UpdateTimeText;
-        MoveExecutor.OnBoardStateChanged += UpdateUIElements;
+        CommandManager.OnCommandExecuted += UpdateUndoButton;
+        CommandManager.OnCommandUndone += UpdateUndoButton;
+        CommandManager.OnHistoryCleared += UpdateUndoButton;
     }
 
-    private void OnDestroy()
+    public void Start()
+    {
+        UpdateUndoButton();
+    }
+
+    private void OnDisable()
     {
         if(GameManager.Instance != null)
         {
@@ -38,8 +45,11 @@ public class UIManager: MonoBehaviour
             GameManager.Instance.OnAutoCompleteAvailable -= ToggleAutoCompleteButton;
             GameManager.Instance.OnMovesChanged -= UpdateMovesText;
             GameManager.Instance.OnTimeChanged -= UpdateTimeText;
-            MoveExecutor.OnBoardStateChanged -= UpdateUIElements;
         }    
+
+        CommandManager.OnCommandExecuted -= UpdateUndoButton;
+        CommandManager.OnCommandUndone -= UpdateUndoButton;
+        CommandManager.OnHistoryCleared -= UpdateUndoButton;
     }
 
     private void HandleStateChange(GameState state)
@@ -57,24 +67,9 @@ public class UIManager: MonoBehaviour
         _autoCompleteButton.SetActive(isAvailable);
     }
 
-    private void UpdateUIElements()
+    private void UpdateUndoButton()
     {
-        Button button = _undoButton.GetComponent<Button>();
-
-        Color normalColor;
-
-        if (!CommandManager.HasCommands)
-        {
-            ColorUtility.TryParseHtmlString("#E6E9ED", out normalColor);
-        }
-        else
-        {
-            ColorUtility.TryParseHtmlString("#396643", out normalColor);
-        }
-
-        ColorBlock colors = button.colors;
-        colors.normalColor = normalColor;
-        button.colors = colors;
+        _undoButton.interactable = CommandManager.HasCommands;
     }
 
     private void UpdateMovesText(int moves)
