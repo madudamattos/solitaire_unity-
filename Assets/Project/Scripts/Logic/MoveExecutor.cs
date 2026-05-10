@@ -10,6 +10,7 @@ namespace Solitaire.Logic
 {
     public static class MoveExecutor
     {
+        private static float cardMoveDuration = 0.35f; 
         public static event Action OnBoardStateChanged;
         public static bool ExecuteMove(List<CardView> cardsToMove, PileView sourcePile, PileView targetPile)
         {
@@ -25,7 +26,7 @@ namespace Solitaire.Logic
             for(int i=0; i<count; i++)
             {
                 CardView card = cardsToProcess[i];
-                card.transform.position = targetPile.GetNextCardPosition();
+                Vector3 targetPosition = targetPile.GetNextCardPosition();
                 card.transform.SetParent(targetPile.transform);
 
                 sourcePile.RemoveCard(card);
@@ -34,7 +35,20 @@ namespace Solitaire.Logic
                 card.SetSortingOrder(targetPile.GetPileCount());
                 card.GetComponent<CardInteraction>().CurrentPile = targetPile;
 
-                if(stockToWaste || wasteToStock) card.RequestFlip();
+                if(stockToWaste)
+                {
+                    card.RequestFlip();
+                    card.MoveTo(targetPosition, cardMoveDuration, 0, () => targetPile.UpdateWasteVisuals());
+
+                } else if ( wasteToStock)
+                {
+                    card.RequestFlip();
+                    card.MoveTo(targetPosition, cardMoveDuration, 0, () => sourcePile.UpdateWasteVisuals());
+                }
+                else
+                {
+                    card.MoveTo(targetPosition, cardMoveDuration, 0);
+                }
             }
             
             if(sourcePile.Type == PileType.Tableau && sourcePile.GetPileCount() > 0)
@@ -47,10 +61,6 @@ namespace Solitaire.Logic
                 }
             }
             
-            // Sempre atualiza o leque do Waste
-            if(sourcePile.Type == PileType.Waste) sourcePile.UpdateWasteVisuals();
-            if(targetPile.Type == PileType.Waste) targetPile.UpdateWasteVisuals();
-
             OnBoardStateChanged?.Invoke();
 
             return flippedCard;
@@ -75,7 +85,7 @@ namespace Solitaire.Logic
             {
                 CardView card = cardsToProcess[i];
                 card.transform.SetParent(sourcePile.transform);
-                card.transform.position = sourcePile.GetNextCardPosition();
+                Vector3 targetPosition = sourcePile.GetNextCardPosition();
 
                 targetPile.RemoveCard(card);
                 sourcePile.AddCard(card);
@@ -83,13 +93,24 @@ namespace Solitaire.Logic
                 card.SetSortingOrder(sourcePile.GetPileCount());
                 card.GetComponent<CardInteraction>().CurrentPile = sourcePile;
 
-                if(stockToWaste || wasteToStock) card.RequestFlip();
-            }
+                if(stockToWaste)
+                {
+                    card.RequestFlip();
+                    card.MoveTo(targetPosition, cardMoveDuration, 0, () => targetPile.UpdateWasteVisuals());
 
-            if(sourcePile.Type == PileType.Waste) sourcePile.UpdateWasteVisuals();
-            if(targetPile.Type == PileType.Waste) targetPile.UpdateWasteVisuals();
+                } else if ( wasteToStock)
+                {
+                    card.RequestFlip();
+                    card.MoveTo(targetPosition, cardMoveDuration, 0, () => sourcePile.UpdateWasteVisuals());
+                }
+                else
+                {
+                    card.MoveTo(targetPosition, cardMoveDuration, 0);
+                }
+            }
         
             OnBoardStateChanged?.Invoke();
         }
+
     }
 }
