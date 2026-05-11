@@ -1,60 +1,125 @@
 using UnityEngine;
 using TMPro;
+using DG.Tweening;
 
-public class TitleAnimator : MonoBehaviour
+public class MainMenuAnimator : MonoBehaviour
 {
-    private TMP_Text _textComponent;
+    [Header("Referências")]
+    [SerializeField] private TMP_Text _titleText;
+    [SerializeField] private Transform[] _cards;
 
-    [Header("Animation Variables")]
-    [SerializeField] private float _amplitude = 6f; 
-    [SerializeField] private float _speed = 2f;
-    [SerializeField] private float _letterOffset = 6f;
+    [Header("Configurações de Animação")]
+    [SerializeField] private float _jumpHeight = 12f;
+    [SerializeField] private float _jumpHeightCard = 80f;
+    [SerializeField] private float _jumpDuration = 0.2f;
+    [SerializeField] private float _jumpDurationCard = 0.3f;
+    [SerializeField] private float _flipDuration = 0.1f; 
 
-    private void Awake()
+    [SerializeField] private float _pauseBetweenSequences = 0.35f;
+
+    private Sequence _mainSequence;
+
+    private void Start()
     {
-        _textComponent = GetComponent<TMP_Text>();
+        BuildAndPlaySequence();
     }
 
-    private void Update() 
+    private void BuildAndPlaySequence()
     {
-        AnimateMath();    
-    }
+        _titleText.ForceMeshUpdate();
+        DOTweenTMPAnimator textAnimator = new DOTweenTMPAnimator(_titleText);
 
-    private void AnimateMath()
-    {
-        _textComponent.ForceMeshUpdate();
-        TMP_TextInfo textInfo = _textComponent.textInfo;
+        _mainSequence = DOTween.Sequence();
+        
+        float currentTime = 0f;
+        float maxTime = 0f; // Variável para rastrear o fim exato da timeline
 
-        for(int i=0; i< textInfo.characterCount; i++)
+        // ==========================================
+        // PARTE 1: ANIMAÇÃO DAS LETRAS
+        // ==========================================
+        for (int i = 0; i < textAnimator.textInfo.characterCount; i++)
         {
-            TMP_CharacterInfo charInfo = textInfo.characterInfo[i];
+            if (!textAnimator.textInfo.characterInfo[i].isVisible) continue;
 
-            // ignora espaços em branco e quebra de linha 
-            if(!charInfo.isVisible) continue;
+            Tween charJump = textAnimator.DOOffsetChar(i, new Vector3(0, _jumpHeight, 0), _jumpDuration)
+                .SetEase(Ease.OutQuad)
+                .SetLoops(2, LoopType.Yoyo);
 
-            int materialIndex = charInfo.materialReferenceIndex;
-            int vertexIndex = charInfo.vertexIndex;
-
-            // Obtém os vértices atuais da malha desta letra específica
-            Vector3[] destinationVertices = textInfo.meshInfo[materialIndex].vertices; 
-
-            // Calcula a curva Seno baseada no tempo
-            float offsetY = Mathf.Sin((Time.time * _speed) + (i * _letterOffset)) * _amplitude; 
-            Vector3 offsetVector = new Vector3(0, offsetY, 0);
-
-            // Aplica o deslocamento aos 4 vértices que compõem o retângulo (quad) da letra
-            destinationVertices[vertexIndex + 0] += offsetVector;
-            destinationVertices[vertexIndex + 1] += offsetVector;
-            destinationVertices[vertexIndex + 2] += offsetVector;
-            destinationVertices[vertexIndex + 3] += offsetVector;
+            _mainSequence.Insert(currentTime, charJump);
+            
+            // O tempo máximo da letra é o tempo atual + ida e volta
+            maxTime = currentTime + (_jumpDuration * 2);
+            currentTime += _jumpDuration;
         }
 
-        // Envia as novas posições de volta para o componente renderizar na tela 
+        // A pausa para o início das cartas usa o maxTime
+        currentTime = maxTime + _pauseBetweenSequences;
 
-        for(int i=0; i< textInfo.meshInfo.Length; i++)
+        // ==========================================
+        // PARTE 2: ANIMAÇÃO E FLIP DAS CARTAS
+        // ==========================================
+        float[] originalYPositions = new float[_cards.Length];
+        float[] originalXScales = new float[_cards.Length];
+        
+        for (int i = 0; i < _cards.Length; i++)
         {
-            textInfo.meshInfo[i].mesh.vertices = textInfo.meshInfo[i].vertices;
-            _textComponent.UpdateGeometry(textInfo.meshInfo[i].mesh, i);
+            originalYPositions[i] = _cards[i].localPosition.y;
+            originalXScales[i] = _cards[i].localScale.x;
+        }
+
+        float halfFlip = _flipDuration / 2f;
+
+        for (int i = _cards.Length - 1; i >= 0; i--)
+        {
+            Transform card = _cards[i];
+            float cardStartTime = currentTime;
+
+            // 1. Subida e Descida mantendo o Yoyo
+            _mainSequence.Insert(cardStartTime, card.DOLocalMoveY(originalYPositions[i] + _jumpHeightCard, _jumpDurationCard)
+                .SetEase(Ease.OutQuad)
+                .SetLoops(2, LoopType.Yoyo));
+
+            // 2. Flip inicia exatamente após o Yoyo terminar (2 * _jumpDurationCard)
+            float flipStartTime = cardStartTime + (_jumpDurationCard * 2);
+
+            _mainSequence.Insert(flipStartTime, card.DOScaleX(0f, halfFlip).SetEase(Ease.InSine));
+            
+            _mainSequence.InsertCallback(flipStartTime + halfFlip, () =>
+            {
+                GameObject child0 = card.GetChild(0).gameObject;
+                GameObject child1 = card.GetChild(1).gameObject;
+                bool isChild0Active = child0.activeSelf;
+                child0.SetActive(!isChild0Active);
+                child1.SetActive(isChild0Active);
+            });
+
+            _mainSequence.Insert(flipStartTime + halfFlip, card.DOScaleX(originalXScales[i], halfFlip).SetEase(Ease.OutSine));
+
+            // Rastreia o momento mais tardio que a sequência alcança
+            float thisCardEndTime = flipStartTime + _flipDuration;
+            if (thisCardEndTime > maxTime)
+            {
+                maxTime = thisCardEndTime;
+            }
+
+            // O avanço para a próxima carta continua o mesmo (cascata)
+            currentTime += _jumpDurationCard;
+        }
+
+        // ==========================================
+        // CONTROLE DO LOOP E PAUSA FINAL
+        // ==========================================
+        // Insere um espaço vazio no final da timeline inteira para aplicar a pausa Cartas -> Letras
+        _mainSequence.Insert(maxTime, DOVirtual.DelayedCall(_pauseBetweenSequences, () => {}));
+        
+        _mainSequence.SetLoops(-1);
+    }
+
+    private void OnDestroy()
+    {
+        if (_mainSequence != null)
+        {
+            _mainSequence.Kill();
         }
     }
 }
