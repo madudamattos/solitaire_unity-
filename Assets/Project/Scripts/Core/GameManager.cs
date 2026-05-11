@@ -28,6 +28,13 @@ public class GameManager : MonoBehaviour
     public event Action<int> OnMovesChanged;
     public event Action<int> OnTimeChanged;
 
+    [Header("Game Settings")]
+
+    public int Difficulty { get; private set; }
+    private DeckData _deck;
+    private Back _spriteBack;
+    [SerializeField] List<DeckData> _deckList = new List<DeckData>();
+
     private void OnEnable()
     {
         MoveExecutor.OnBoardStateChanged += EvaluateWinCondition;
@@ -73,6 +80,16 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void StartNewGame(int selectedDifficulty, int selectedDeck, int selectedSprite)
+    {
+        Difficulty = selectedDifficulty; 
+
+        _deck = _deckList[selectedDeck];
+
+        _spriteBack = _deck.cardsBack[selectedSprite].color;
+
+        StartDeal();
+    }
     private void InitializeGame()
     {
         CommandManager.ClearHistory();
@@ -80,7 +97,7 @@ public class GameManager : MonoBehaviour
         // criação das cartas
         List<CardModel> deckModels = DeckGenerator.CreateFullDeck();
         
-        List<CardView> cardViews = _deckFactory.CreateDeck(deckModels);
+        List<CardView> cardViews = _deckFactory.CreateDeck(deckModels, _deck, _spriteBack);
 
         // organizar cartas em pilhas 
         Dealer dealer = new Dealer();

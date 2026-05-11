@@ -14,8 +14,11 @@ namespace Solitaire.Factories
         [SerializeField] private GameObject _cardPrefab;
         [SerializeField] private Back _cardsBack = Back.Blue;
 
-        public List<CardView> CreateDeck(List<CardModel> models)
+        public List<CardView> CreateDeck(List<CardModel> models, DeckData deckData, Back backSprite)
         {
+            _cardsBack = backSprite;
+            _deckData = deckData;  
+             
             List<CardView> cardViews = new List<CardView>();
 
             foreach (var model in models)

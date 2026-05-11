@@ -10,6 +10,7 @@ public class UIManager: MonoBehaviour
 {
     [Header("Panels")]
     [SerializeField] private GameObject _menuPanel;
+    [SerializeField] private GameObject _settingsPanel;
     [SerializeField] private GameObject _gameTable;
     [SerializeField] private GameObject _gamePanel;
     [SerializeField] private GameObject _victoryPanel;
@@ -21,6 +22,24 @@ public class UIManager: MonoBehaviour
     [Header("UI Text")]
     [SerializeField] private TextMeshProUGUI _movesText;
     [SerializeField] private TextMeshProUGUI _timerText;
+
+    [Header("Difficulty Toggles")]
+    [SerializeField] private Toggle _toggleDiff1;
+    [SerializeField] private Toggle _toggleDiff3;
+
+    [Header("Deck Toggles")]
+    [SerializeField] private Toggle _toggleDeck1;
+    [SerializeField] private Toggle _toggleDeck2;
+
+    [Header("Sprite Toggles")]
+    [SerializeField] private Toggle _toggleSprite1;
+    [SerializeField] private Toggle _toggleSprite2;
+    [SerializeField] private Toggle _toggleSprite3;
+    [SerializeField] private Toggle _toggleSprite4;
+
+    [Header("Sprites Layout")]
+    [SerializeField] private GameObject _cardSpriteLayout1;
+    [SerializeField] private GameObject _cardSpriteLayout2;
 
     private void OnEnable()
     {
@@ -85,11 +104,40 @@ public class UIManager: MonoBehaviour
         TimeSpan time = TimeSpan.FromSeconds(seconds);
         _timerText.text = "TIMER: " + time.ToString(@"hh\:mm\:ss");
     }
-    
 
-    public void UI_StartGame()
+    public void ToggleAltDeck(bool active)
     {
-        GameManager.Instance.StartDeal();
+        _cardSpriteLayout1.SetActive(!active);
+        _cardSpriteLayout2.SetActive(active);
+    }
+
+    public void ToggleBaseDeck(bool active)
+    {
+        _cardSpriteLayout1.SetActive(active);
+        _cardSpriteLayout2.SetActive(!active);
+    }
+
+    // Chame este método no evento OnClick() do seu botão principal de "Jogar"
+    public void UI_StartGameWithSettings()
+    {
+        // Operador ternário para definir os valores baseados nos toggles ativos
+        int selectedDifficulty = _toggleDiff1.isOn ? 1 : 3;
+        int selectedDeck = _toggleDeck1.isOn ? 0 : 1;
+        int selectedSprite = 0;
+
+        if (_toggleSprite1.isOn) selectedSprite = 0;
+        else if (_toggleSprite2.isOn) selectedSprite = 1;
+        else if (_toggleSprite3.isOn) selectedSprite = 2;
+        else if (_toggleSprite4.isOn) selectedSprite = 3;  
+
+        _menuPanel.SetActive(false);
+
+        GameManager.Instance.StartNewGame(selectedDifficulty, selectedDeck, selectedSprite);
+    }
+
+    public void UI_Play()
+    {
+        _settingsPanel.SetActive(true); 
     }
 
     public void UI_ReturnToMenu()

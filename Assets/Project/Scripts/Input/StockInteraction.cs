@@ -5,6 +5,7 @@ using Solitaire.Views;
 using Solitaire.Managers;
 using Solitaire.Logic;
 using System.Collections.Generic;
+using Solitaire.Core;
 
 namespace Solitaire.Input
 {
@@ -25,7 +26,7 @@ namespace Solitaire.Input
         {
             if (_stockPile.GetPileCount() > 0)
             {
-                DrawCards(1);
+                DrawCards(GameManager.Instance.Difficulty);
             }
             else if(_wastePile.GetPileCount() > 0)
             {
