@@ -117,10 +117,8 @@ public class UIManager: MonoBehaviour
         _cardSpriteLayout2.SetActive(!active);
     }
 
-    // Chame este método no evento OnClick() do seu botão principal de "Jogar"
     public void UI_StartGameWithSettings()
     {
-        // Operador ternário para definir os valores baseados nos toggles ativos
         int selectedDifficulty = _toggleDiff1.isOn ? 1 : 3;
         int selectedDeck = _toggleDeck1.isOn ? 0 : 1;
         int selectedSprite = 0;

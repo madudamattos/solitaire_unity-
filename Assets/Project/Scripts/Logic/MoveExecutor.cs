@@ -37,12 +37,12 @@ namespace Solitaire.Logic
                 if(stockToWaste)
                 {
                     card.RequestFlip();
-                    card.MoveTo(targetPosition, 0.20f, 0, () => targetPile.UpdateWasteVisuals());
+                    card.MoveTo(targetPosition, 0.12f, 0, () => targetPile.UpdateWasteVisuals());
 
                 } else if ( wasteToStock)
                 {
                     card.RequestFlip();
-                    card.MoveTo(targetPosition, 0.20f, 0, () => sourcePile.UpdateWasteVisuals());
+                    card.MoveTo(targetPosition, 0.12f, 0, () => sourcePile.UpdateWasteVisuals());
                 }
                 else
                 {
@@ -95,12 +95,12 @@ namespace Solitaire.Logic
                 if(stockToWaste)
                 {
                     card.RequestFlip();
-                    card.MoveTo(targetPosition, 0.20f, 0, () => targetPile.UpdateWasteVisuals());
+                    card.MoveTo(targetPosition, 0.12f, 0, () => targetPile.UpdateWasteVisuals());
 
                 } else if ( wasteToStock)
                 {
                     card.RequestFlip();
-                    card.MoveTo(targetPosition, 0.20f, 0, () => sourcePile.UpdateWasteVisuals());
+                    card.MoveTo(targetPosition, 0.12f, 0, () => sourcePile.UpdateWasteVisuals());
                 }
                 else
                 {

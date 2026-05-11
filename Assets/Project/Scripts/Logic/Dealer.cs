@@ -59,7 +59,7 @@ namespace Solitaire.Logic
         private void MoveCardToPile(CardView card, PileView pile, bool flipOnArrival, Action onArrival = null)
         {
             // estado lógico (imediato)
-            Vector3 targetPosition = pile.Type == PileType.Tableau? pile.GetNextCardPositionDeal() : pile.transform.position;
+            Vector3 targetPosition = pile.GetNextCardPosition();
 
             card.transform.SetParent(pile.transform);
             pile.AddCard(card);

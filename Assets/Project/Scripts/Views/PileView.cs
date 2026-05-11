@@ -15,42 +15,29 @@ namespace Solitaire.Views
         // lista visual das cartas que estão filhas desta pilha 
         private List<CardView> CardsInPile = new List<CardView>();
 
-        public Vector3 GetNextCardPositionDeal()
-        {
-            if(Type == PileType.Tableau)
-            {
-                float offset = 0.45f;
-
-                // offset vertical para as cartas do tableau aparecerem cascateadas
-                float yOffset = CardsInPile.Count * - offset;
-                return transform.position + new Vector3(0, yOffset, 0); 
-            }
-            return transform.position;
-        }
-        
         public Vector3 GetNextCardPosition()
         {
-            if(Type == PileType.Tableau || Type == PileType.Waste)
-            {
-                // Se a pilha estiver vazia, retorna a âncora principal da pilha
-                if (CardsInPile.Count == 0)
-                    return transform.position;
-                
-                float offset = 0.45f;
-                if(CardsInPile.Count > 0)
-                {
-                    if(GetLastCard().Presenter.Model.IsFaceUp)
-                        offset = 0.92f;
-                }
+            
+            if(Type == PileType.Foundation || Type == PileType.Stock || CardsInPile.Count <= 0 ) return transform.position;
 
-                // Pega a posição real na tela da última carta e desce a partir dela
-                Vector3 lastCardPos = CardsInPile.Last().transform.position;
-                
-                return lastCardPos + new Vector3(0, -offset, 0); 
+            float offset = 0.92f;
+
+            float yOffset = 0;
+            float zOffset = 0;
+
+            if (Type == PileType.Waste){
+                yOffset = -offset;
+                return CardsInPile.Last().transform.position + new Vector3(0, yOffset, zOffset); 
             }
 
-            // Para Stock e Foundations, todas as cartas ficam na posição exata da pilha
-            return transform.position;
+            // offset vertical para as cartas do tableau aparecerem cascateadas
+            for(int i=0; i<CardsInPile.Count; i++)
+            {
+                yOffset -= CardsInPile[i].Presenter.Model.IsFaceUp? offset : offset/2;
+            }
+
+            return transform.position + new Vector3(0, yOffset, zOffset); 
+
         }
 
         public void AddCard(CardView card)
@@ -97,7 +84,8 @@ namespace Solitaire.Views
             int count = CardsInPile.Count;
             if(count == 0) return;
 
-            float offset = 0.92f;
+            float yOffset = 0.92f;
+            float zOffset = 0.01f;
 
             for(int i = count - 1; i >= 0; i--) 
             {
@@ -108,7 +96,8 @@ namespace Solitaire.Views
                 {
                     // inverte o indice para o slot visual (0, 1, 2)
                     int slotPos = i - Mathf.Max(0, count - 3); 
-                    targetPos.y -= slotPos * offset;
+                    targetPos.y -= slotPos * yOffset;
+                    targetPos.z -= slotPos *zOffset;
                 }
 
                 card.MoveTo(targetPos, 0.2f, 0f);
